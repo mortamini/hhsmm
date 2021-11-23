@@ -11,7 +11,9 @@ initial_cluster(
   ltr = FALSE,
   equispace = FALSE,
   final.absorb = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  regress = FALSE,
+  resp.ind = 1
 )
 }
 \arguments{
@@ -31,11 +33,16 @@ automatically based on the within cluster sum of squares
 \item{ltr}{logical. if TRUE a left to right hidden hybrid Markov/semi-Markov model is assumed}
 
 \item{equispace}{logical. if TRUE the left to right clustering will be performed simply with equal time spaces.
-This option is suitable for speech recognition applications.}
+This option is suitable for speech recognition applications}
 
 \item{final.absorb}{logical. if TRUE the final state of the sequence is assumed to be the absorbance state}
 
 \item{verbose}{logical. if TRUE the outputs will be printed}
+
+\item{regress}{logical. if TRUE the linear regression clustering will be performed}
+
+\item{resp.ind}{the column indices of the response variables for the linear regression clustering approach. The
+default is 1, which means that the first column is the univariate response variable}
 }
 \value{
 a list containing the following items:

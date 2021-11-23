@@ -42,59 +42,64 @@ simulate.hhsmmspec <- function(object, nsim, seed=NULL, remission=rmixmvnorm,...
 	for(j in 1:object$J) if(object$semi[j] & object$transition[j,j]!=0) stop('Semi-markov states must have diagonal zero transition elements')
 	if(length( nsim)==1) M =  nsim else M = max( nsim)
 	s0 = .simulate_markov(object$init, object$transition,  nsim)
-	if (object$sojourn$type == "poisson") {
-      	rsojourn <- function(ii){ 
-			if(object$semi[ii]) .rpois.hhsmm(1,object$sojourn$lambda[ii],object$sojourn$shift[ii])
-			else{ 
-				if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
-				else 1
+	if(!all(!object$semi)){
+		if (object$sojourn$type == "poisson") {
+      		rsojourn <- function(ii){ 
+				if(object$semi[ii]) .rpois.hhsmm(1,object$sojourn$lambda[ii],object$sojourn$shift[ii])
+				else{ 
+					if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
+					else 1
 				}
-		}
-    	}else if (object$sojourn$type == "gamma") {
-    		rsojourn <- function(ii){ 
+			}
+    		}else if (object$sojourn$type == "gamma") {
+    			rsojourn <- function(ii){ 
 				if(object$semi[ii])  trunc(rgamma(1,shape=object$sojourn$shape[ii],scale=object$sojourn$scale[ii]))+1
 				else{ 
 					if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
 					else 1
 				}
-		} 
-   	} else if (object$sojourn$type == "lnorm") {
-    		rsojourn <- function(ii){
-			if(object$semi[ii])  trunc(rlnorm(1,object$sojourn$meanlog[ii],object$sojourn$sdlog[ii]))+1
-			else{ 
-				if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
-				else 1
+			} 
+   		} else if (object$sojourn$type == "lnorm") {
+    			rsojourn <- function(ii){
+				if(object$semi[ii])  trunc(rlnorm(1,object$sojourn$meanlog[ii],object$sojourn$sdlog[ii]))+1
+				else{ 
+					if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
+					else 1
+				}
 			}
-		}
-	} else if (object$sojourn$type == "logarithmic") {
-      	rsojourn <- function(ii){
-			if(object$semi[ii]) .rlog(1,object$sojourn$shape[ii])
-			else{ 
-				if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
-				else 1
-			}
-		}        
-	} else if (object$sojourn$type == "nbinom") {
-      	rsojourn <- function(ii){
+		} else if (object$sojourn$type == "logarithmic") {
+      		rsojourn <- function(ii){
+				if(object$semi[ii]) .rlog(1,object$sojourn$shape[ii])
+				else{ 
+					if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
+					else 1
+				}
+			}        
+		} else if (object$sojourn$type == "nbinom") {
+      		rsojourn <- function(ii){
 				if(object$semi[ii]) .rnbinom.hhsmm(1,object$sojourn$shape[ii])
 				else{ 
 					if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
 					else 1
 				}
-		}   
-    } else if (object$sojourn$type == "nonparametric") {
-    		rsojourn <- function(ii){
-			if(object$semi[ii]) sample(1:nrow(object$sojourn$d), 1, prob = object$sojourn$d[,ii])
-			else{ 
-				if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
-				else 1
-			}
-		} 
-    	} else stop("Unknown sojourn distribution")
-	u = sapply(s0,rsojourn)
-    	s1 = rep(s0, u)[(left.truncate + 1):(sum(u) - right.truncate)]
+			}   
+    		} else if (object$sojourn$type == "nonparametric") {
+    			rsojourn <- function(ii){
+				if(object$semi[ii]) sample(1:nrow(object$sojourn$d), 1, prob = object$sojourn$d[,ii])
+				else{ 
+					if(object$transition[ii,ii]<1) rgeom(1, 1-object$transition[ii,ii])
+					else 1
+				}
+			} 
+    		} else stop("Unknown sojourn distribution")
+		u = sapply(s0,rsojourn)
+    		s1 = rep(s0, u)[(left.truncate + 1):(sum(u) - right.truncate)]
+	}else{
+		s1 = s0
+		u = rep(1,sum(nsim))
+	}
     	x = as.matrix(sapply(s1,function(i) remission(i,object,...)))
-	if(length( nsim)> 1){
+	if(length(nsim)> 1){
   		N =  nsim
   		tmp = cumsum(c(1,N))
   		for(i in 1:(length(tmp)-1)) N[i] = sum(u[tmp[i]:(tmp[i+1]-1)])

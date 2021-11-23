@@ -20,7 +20,10 @@
 #' @param final.absorb logical. if TRUE the final state of the sequence is assumed to be the absorbance state
 #' @param verbose logical. if TRUE the outputs will be printed 
 #' @param equispace logical. if TRUE the left to right clustering will be performed simply with equal time spaces. 
-#' This option is suitable for speech recognition applications.
+#' This option is suitable for speech recognition applications
+#' @param regress logical. if TRUE the linear regression clustering will be performed
+#' @param resp.ind the column indices of the response variables for the linear regression clustering approach. The 
+#' default is 1, which means that the first column is the univariate response variable
 #'
 #' @return a list containing the following items:
 #' \itemize{
@@ -58,7 +61,8 @@
 #'
 #' @export
 #'
-initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.absorb=FALSE,verbose=FALSE){
+initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.absorb=FALSE,verbose=FALSE,
+	regress=FALSE,resp.ind=1){
 		if(length(nmix)==1 & mode(nmix)=="numeric") nmix = rep(nmix,nstate)
 		if(length(nmix)!=nstate & mode(nmix)=="numeric") stop("length of nmix must be 1 or equal the number of states.")
 		if(class(train)!="hhsmmdata") stop("class of train data must be hhsmmdata !")
@@ -126,7 +130,9 @@ initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.abso
 					if(verbose) .progress(x=m,max=num.units)
 					C=as.matrix(data[(Ns[m]+1):Ns[m+1],])
 					if(final.absorb) D= as.matrix(C[-nrow(C),]) else D = C
-					clus = ltr_clus(D,nstate-final.absorb)
+					if(regress){
+						clus = ltr_reg_clus(D,nstate-final.absorb,resp.ind=resp.ind)
+					}else clus = ltr_clus(D,nstate-final.absorb)
 					for(j in 1:(nstate-final.absorb)){
   						if(sum(clus==j)>0){
 							xt[[m]][[j]]=matrix(D[clus==j,],
@@ -147,7 +153,9 @@ initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.abso
 					}
 				}# for m 
 			} else{
-					clus = kmeans(data,nstate,nstart=10)$cluster
+					if(regress){
+						clus = .kregs(data,nstate,nstart=10,resp.ind=resp.ind)$cluster
+					}else clus = kmeans(data,nstate,nstart=10)$cluster
 					for(m in 1:num.units){
 						clusters[[m]] = clus[(Ns[m]+1):Ns[m+1]]
 						xt[[m]] = list()
@@ -177,7 +185,9 @@ initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.abso
 				anmix[j] = 1
 				while(continue & (cntr+1) < (nrow(Tx[[j]])*0.5) ){
 					cntr = cntr + 1
-					tmpclus = kmeans(Tx[[j]],cntr+1,nstart=10)
+					if(regress){
+						tmpclus = .kregs(Tx[[j]],cntr+1,nstart=10,resp.ind=resp.ind)
+					}else   tmpclus = kmeans(Tx[[j]],cntr+1,nstart=10)
 					newW = sum(tmpclus$withinss)
 					DW = c(DW,oldW - newW)
 					oldW = newW
@@ -190,10 +200,14 @@ initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.abso
 						}# if 
 					}# if 
 				}# while
-				mix.clus[[j]] = kmeans(Tx[[j]],anmix[j],nstart=10)$cluster	
+				if(regress){
+					mix.clus[[j]] = .kregs(Tx[[j]],anmix[j],nstart=10,resp.ind=resp.ind)$cluster
+				}else mix.clus[[j]] = kmeans(Tx[[j]],anmix[j],nstart=10)$cluster	
 			}# if 
 			} else {
-				mix.clus[[j]] = kmeans(Tx[[j]],nmix[j],nstart=10)$cluster	
+				if(regress){
+					mix.clus[[j]] = .kregs(Tx[[j]],nmix[j],nstart=10,resp.ind=resp.ind)$cluster
+				}else mix.clus[[j]] = kmeans(Tx[[j]],nmix[j],nstart=10)$cluster	
 				anmix[j] = nmix[j]
 			}# if else 
 		}# for j

@@ -54,7 +54,7 @@ initial_estimate<-function(clus,mstep=mixmvnorm_mstep,verbose=FALSE,...){
 		artwt2 = list()
 		for(j in 1:nstate) artwt2[[j]] = matrix(1,10,nmix[j])
 		artem = tryCatch({mstep(artx,artwt1,artwt2,...)},
-			error=function(e){stop("mstep function is not suitable!")})
+			error=function(e){stop(paste("The following error has occurred in artificial application of your your mstep function:","\n",e))})
 		leng = list()
 		if(any(nmix>1) & !("mix.p" %in% names(artem))) stop("mstep function is not suitable for mixture emissions!")
 		Tx = list()

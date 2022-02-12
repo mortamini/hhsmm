@@ -26,39 +26,41 @@ list of emission (mixture of Gaussian linear regression models) parameters:
 }
 \description{
 The M step function of the EM algorithm for the mixture
-of Gaussian linear (Markov-sweaching) regressions as the emission distribution using the
+of Gaussian linear (Markov-switching) regressions as the emission distribution using the
 responses and covariates matrices and the estimated weight vectors
 }
 \examples{
 J <- 3
-initial <- c(1,0,0)
-semi <- rep(FALSE,3)
-P <- matrix(c(0.5, 0.2, 0.3, 0.2, 0.5, 0.3, 0.1, 0.4, 0.5), nrow = J, byrow=TRUE)
-par <- list(intercept = list(3,list(-10,-1),14),
-coefficient = list(-1,list(1,5),-7),
-csigma = list(1.2,list(2.3,3.4),1.1),
-mix.p = list(1,c(0.4,0.6),1))
+initial <- c(1, 0, 0)
+semi <- rep(FALSE, 3)
+P <- matrix(c(0.5, 0.2, 0.3, 0.2, 0.5, 0.3, 0.1, 0.4, 0.5), nrow = J, 
+byrow = TRUE)
+par <- list(intercept = list(3, list(-10, -1), 14),
+coefficient = list(-1, list(1, 5), -7),
+csigma = list(1.2, list(2.3, 3.4), 1.1),
+mix.p = list(1, c(0.4, 0.6), 1))
 model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 dens.emis = dmixlm, semi = semi)
-train <- simulate(model, nsim = c(20,30,42,50), seed = 1234, remission = rmixlm, 
-covar.mean=0, covar.cov=1)
-plot(train$x[,1]~train$x[,2],col=train$s,pch=16)
-clus = initial_cluster(train=train,nstate=3,nmix=c(1,2,1),ltr=FALSE,
-final.absorb=FALSE,verbose=TRUE,regress=TRUE)
-initmodel = initialize_model(clus=clus,mstep = mixlm_mstep,
-dens.emission = dmixlm, sojourn=NULL, semi=rep(FALSE,3),M=max(train$N),
-verbose=TRUE)
+train <- simulate(model, nsim = c(20, 30, 42, 50), seed = 1234, 
+remission = rmixlm, covar.mean = 0, covar.cov = 1)
+clus = initial_cluster(train = train, nstate = 3, nmix = c(1, 2, 1),
+ltr = FALSE, final.absorb = FALSE, verbose = TRUE, regress = TRUE)
+initmodel = initialize_model(clus = clus ,mstep = mixlm_mstep,
+dens.emission = dmixlm, sojourn = NULL, semi = rep(FALSE, 3),
+M = max(train$N),verbose = TRUE)
 fit1 = hhsmmfit(x = train, model = initmodel, mstep = mixlm_mstep,
 M = max(train$N), maxit = 100, lock.transition = FALSE, 
-lock.d = FALSE, lock.init=TRUE, graphical = FALSE,verbose = TRUE)
+lock.d = FALSE, lock.init = FALSE, graphical = FALSE, verbose = TRUE)
+plot(train$x[, 1] ~ train$x[, 2], col = train$s, pch = 16, 
+xlab = "x", ylab = "y")
 abline(fit1$model$parms.emission$intercept[[1]],
-fit1$model$parms.emission$coefficient[[1]],col=1)
+fit1$model$parms.emission$coefficient[[1]], col = 1)
 abline(fit1$model$parms.emission$intercept[[2]][[1]],
-fit1$model$parms.emission$coefficient[[2]][[1]],col=2)
+fit1$model$parms.emission$coefficient[[2]][[1]], col = 2)
 abline(fit1$model$parms.emission$intercept[[2]][[2]],
-fit1$model$parms.emission$coefficient[[2]][[2]],col=2)
+fit1$model$parms.emission$coefficient[[2]][[2]], col = 2)
 abline(fit1$model$parms.emission$intercept[[3]],
-fit1$model$parms.emission$coefficient[[3]],col=3)
+fit1$model$parms.emission$coefficient[[3]], col = 3)
 
 }
 \references{
@@ -67,5 +69,5 @@ regime-switching regression models with endogenous switching.
 Journal of Econometrics, 143(2), 263-273.
 }
 \author{
-Morteza Amini, \email{morteza.amini@ut.ac.ir}, Afarin Bayat,  \email{aftbayat@gmail.com}
+Morteza Amini, \email{morteza.amini@ut.ac.ir}
 }

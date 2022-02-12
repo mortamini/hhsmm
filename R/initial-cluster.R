@@ -15,6 +15,8 @@
 #' \item a positive (non-zero) integer 
 #' \item the text \code{"auto"}: the number of mixture components will be determined 
 #' automatically based on the within cluster sum of squares 
+#' \item NULL if no mixture distribution is not considered as the emission. This option is 
+#' usefull for the nonparametric emission distribution (\code{nonpar_mstep} and \code{dnonpar})
 #' }
 #' @param ltr logical. if TRUE a left to right hidden hybrid Markov/semi-Markov model is assumed
 #' @param final.absorb logical. if TRUE the final state of the sequence is assumed to be the absorbance state
@@ -43,26 +45,30 @@
 #'
 #' @examples
 #' J <- 3
-#' initial <- c(1,0,0)
-#' semi <- c(FALSE,TRUE,FALSE)
-#' P <- matrix(c(0.8, 0.1, 0.1, 0.5, 0, 0.5, 0.1, 0.2, 0.7), nrow = J, byrow=TRUE)
-#' par <- list(mu = list(list(7,8),list(10,9,11),list(12,14)),
-#' sigma = list(list(3.8,4.9),list(4.3,4.2,5.4),list(4.5,6.1)),
-#' mix.p = list(c(0.3,0.7),c(0.2,0.3,0.5),c(0.5,0.5)))
-#' sojourn <- list(shape = c(0,3,0), scale = c(0,10,0), type = "gamma")
+#' initial <- c(1, 0, 0)
+#' semi <- c(FALSE, TRUE, FALSE)
+#' P <- matrix(c(0.8, 0.1, 0.1, 0.5, 0, 0.5, 0.1, 0.2, 0.7), nrow = J, 
+#' byrow = TRUE)
+#' par <- list(mu = list(list(7, 8), list(10, 9, 11), list(12, 14)),
+#' sigma = list(list(3.8, 4.9), list(4.3, 4.2, 5.4), list(4.5, 6.1)),
+#' mix.p = list(c(0.3, 0.7), c(0.2, 0.3, 0.5), c(0.5, 0.5)))
+#' sojourn <- list(shape = c(0, 3, 0), scale = c(0, 10, 0), type = "gamma")
 #' model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 #' dens.emis = dmixmvnorm, sojourn = sojourn, semi = semi)
-#' train <- simulate(model, nsim = c(10,8,8,18), seed = 1234, remission = rmixmvnorm)
-#' test <-  simulate(model, nsim = c(7,3,3,8), seed = 1234, remission = rmixmvnorm)
-#' clus = initial_cluster(train,nstate=3,nmix=c(2,2,2),ltr=FALSE,
-#' final.absorb=FALSE,verbose=TRUE)
+#' train <- simulate(model, nsim = c(10, 8, 8, 18), seed = 1234, 
+#' remission = rmixmvnorm)
+#' clus = initial_cluster(train, nstate = 3, nmix = c(2 ,2, 2),ltr = FALSE,
+#' final.absorb = FALSE, verbose = TRUE)
 #'
 #' @importFrom mice mice complete
+#' @importFrom progress progress_bar
 #'
 #' @export
 #'
-initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.absorb=FALSE,verbose=FALSE,
-	regress=FALSE,resp.ind=1){
+initial_cluster <- function(train, nstate, nmix, ltr = FALSE, 
+	equispace = FALSE, final.absorb = FALSE, verbose = FALSE,
+	regress = FALSE, resp.ind = 1)
+{
 		if(length(nmix)==1 & mode(nmix)=="numeric") nmix = rep(nmix,nstate)
 		if(length(nmix)!=nstate & mode(nmix)=="numeric") stop("length of nmix must be 1 or equal the number of states.")
 		if(class(train)!="hhsmmdata") stop("class of train data must be hhsmmdata !")
@@ -125,9 +131,12 @@ initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.abso
 			}# for m 
 		}else{
 			if(ltr){
+				pb <- progress_bar$new(
+					format = " clustering [:bar] :percent in :elapsed",
+					total = num.units, clear = FALSE, width= 60)
 				for(m in 1:num.units){
 					xt[[m]] = list()
-					if(verbose) .progress(x=m,max=num.units)
+					if(verbose) pb$tick()
 					C=as.matrix(data[(Ns[m]+1):Ns[m+1],])
 					if(final.absorb) D= as.matrix(C[-nrow(C),]) else D = C
 					if(regress){
@@ -170,40 +179,41 @@ initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.abso
 			}# if else ltr
 		}# if else equispace
 		for(j in 1:nstate) Tx[[j]] = as.matrix(Tx[[j]][-1,])
-		anmix = c()
-		mix.clus = list()
-		for(j in 1:nstate){
-			if(verbose) cat("State ",j,"\n")
-			if(verbose) cat("Between sequence clustering ... \n")
-			if(length(nmix)==1){ if(nmix=="auto"){
-				if(verbose) cat("Automatic determination of the number of mixture components ... \n")
-				continue = TRUE
-				DW = Inf
-				oldW = (nrow(Tx[[j]])-1)*sum(apply(Tx[[j]],2,var))
-				cntr = 0
-				eps = 1e-2
-				anmix[j] = 1
-				while(continue & (cntr+1) < (nrow(Tx[[j]])*0.5) ){
-					cntr = cntr + 1
-					if(regress){
-						tmpclus = .kregs(Tx[[j]],cntr+1,nstart=10,resp.ind=resp.ind)
-					}else   tmpclus = kmeans(Tx[[j]],cntr+1,nstart=10)
-					newW = sum(tmpclus$withinss)
-					DW = c(DW,oldW - newW)
-					oldW = newW
-					if(cntr>2){
-						DDW = -diff(DW)/DW[-1]
-						DDDW = -diff(DDW)
-						if(any(DDDW<=0) | cntr > 10){
-							anmix[j] = which.max(DDW[-1]) + 2
-							continue = FALSE
+		if(!is.null(nmix)){
+			anmix = c()
+			mix.clus = list()
+			for(j in 1:nstate){
+				if(verbose) cat("State ",j,"\n")
+				if(verbose) cat("Between sequence clustering ... \n")
+				if(length(nmix)==1){ if(nmix=="auto"){
+					if(verbose) cat("Automatic determination of the number of mixture components ... \n")
+					continue = TRUE
+					DW = Inf
+					oldW = (nrow(Tx[[j]])-1)*sum(apply(Tx[[j]],2,var))
+					cntr = 0
+					eps = 1e-2
+					anmix[j] = 1
+					while(continue & (cntr+1) < (nrow(Tx[[j]])*0.5) ){
+						cntr = cntr + 1
+						if(regress){
+							tmpclus = .kregs(Tx[[j]],cntr+1,nstart=10,resp.ind=resp.ind)
+						}else   tmpclus = kmeans(Tx[[j]],cntr+1,nstart=10)
+						newW = sum(tmpclus$withinss)
+						DW = c(DW,oldW - newW)
+						oldW = newW
+						if(cntr>2){
+							DDW = -diff(DW)/DW[-1]
+							DDDW = -diff(DDW)
+							if(any(DDDW<=0) | cntr > 10){
+								anmix[j] = which.max(DDW[-1]) + 2
+								continue = FALSE
+							}# if 
 						}# if 
-					}# if 
-				}# while
-				if(regress){
-					mix.clus[[j]] = .kregs(Tx[[j]],anmix[j],nstart=10,resp.ind=resp.ind)$cluster
-				}else mix.clus[[j]] = kmeans(Tx[[j]],anmix[j],nstart=10)$cluster	
-			}# if 
+					}# while
+					if(regress){
+						mix.clus[[j]] = .kregs(Tx[[j]],anmix[j],nstart=10,resp.ind=resp.ind)$cluster
+					}else mix.clus[[j]] = kmeans(Tx[[j]],anmix[j],nstart=10)$cluster	
+				}# if 
 			} else {
 				if(regress){
 					mix.clus[[j]] = .kregs(Tx[[j]],nmix[j],nstart=10,resp.ind=resp.ind)$cluster
@@ -211,6 +221,10 @@ initial_cluster<-function(train,nstate,nmix,ltr=FALSE,equispace=FALSE,final.abso
 				anmix[j] = nmix[j]
 			}# if else 
 		}# for j
+	}else{
+		mix.clus = NULL
+		anmix = NULL
+	}#if not null nmix
 	out = list(clust.X=xt, mix.clus=mix.clus, state.clus = clusters, 
 		nmix=anmix, ltr = ltr, final.absorb = final.absorb, miss = miss)
 	return(out)

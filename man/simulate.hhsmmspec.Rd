@@ -4,7 +4,17 @@
 \alias{simulate.hhsmmspec}
 \title{Simulation of data from hhsmm model}
 \usage{
-\method{simulate}{hhsmmspec}(object, nsim, seed = NULL, remission = rmixmvnorm, ...)
+\method{simulate}{hhsmmspec}(
+  object,
+  nsim,
+  seed = NULL,
+  remission = rmixmvnorm,
+  autoregress = FALSE,
+  lags = 1,
+  startmean,
+  startcov,
+  ...
+)
 }
 \arguments{
 \item{object}{a \code{\link{hhsmmspec}} model}
@@ -14,6 +24,20 @@
 \item{seed}{a random seed to be set}
 
 \item{remission}{a random emission generation function (default = \code{\link{rmixmvnorm}})}
+
+\item{autoregress}{logical. if TRUE the auto-regressive data generation will be considered with
+\code{rmixar} function}
+
+\item{lags}{a positive integer which is the number of lags to be considered for the
+auto-regressive sequence}
+
+\item{startmean}{the mean vector for starting value of the auto-regressive
+sequence (if \code{autoregress == TRUE}). If it is not specified the zero mean
+vector will be considered}
+
+\item{startcov}{the covarince matrix for starting value of the auto-regressive
+sequence (if \code{autoregress == TRUE}). If it is not specified the identity matrix
+will be considered}
 
 \item{...}{additional parameters of the \code{remission} function}
 }
@@ -30,16 +54,18 @@ Simulates a data set of class \code{"hhsmmdata"} using a \code{\link{hhsmmspec}}
 }
 \examples{
 J <- 3
-initial <- c(1,0,0)
-semi <- c(FALSE,TRUE,FALSE)
-P <- matrix(c(0.8, 0.1, 0.1, 0.5, 0, 0.5, 0.1, 0.2, 0.7), nrow = J, byrow=TRUE)
-par <- list(mu = list(list(7,8),list(10,9,11),list(12,14)),
-sigma = list(list(3.8,4.9),list(4.3,4.2,5.4),list(4.5,6.1)),
-mix.p = list(c(0.3,0.7),c(0.2,0.3,0.5),c(0.5,0.5)))
-sojourn <- list(shape = c(0,3,0), scale = c(0,8,0), type = "gamma")
+initial <- c(1, 0, 0)
+semi <- c(FALSE, TRUE, FALSE)
+P <- matrix(c(0.8, 0.1, 0.1, 0.5, 0, 0.5, 0.1, 0.2, 0.7), nrow = J, 
+byrow = TRUE)
+par <- list(mu = list(list(7, 8), list(10, 9, 11), list(12, 14)),
+sigma = list(list(3.8, 4.9), list(4.3, 4.2, 5.4), list(4.5, 6.1)),
+mix.p = list(c(0.3, 0.7),c(0.2, 0.3, 0.5), c(0.5, 0.5)))
+sojourn <- list(shape = c(0, 3, 0), scale = c(0, 8, 0), type = "gamma")
 model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 dens.emis = dmixmvnorm, sojourn = sojourn, semi = semi)
-train <- simulate(model, nsim = c(8,5,5,10), seed = 1234, remission = rmixmvnorm)
+train <- simulate(model, nsim = c(8, 5, 5, 10), seed = 1234, 
+remission = rmixmvnorm)
 
 }
 \author{

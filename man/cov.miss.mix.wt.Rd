@@ -59,17 +59,17 @@ vectors for a data matrix containing missing values (NA or NaN)
 }
 \examples{
 data(CMAPSS)
-x0 = CMAPSS$train$x[1:CMAPSS$train$N[1],]
+x0 = CMAPSS$train$x[1:CMAPSS$train$N[1], ]
 n = nrow(x0)
 wt1 = runif(n)
 wt2 = runif(n)
 p = ncol(x0)
-sammissall = sample(1:n,trunc(n/20))
+sammissall = sample(1:n, trunc(n / 20))
 means = secm = list()
 for(ii in 1:n){ 
 	if(ii \%in\% sammissall){
-   means[[ii]] = colMeans(x0[sammissall,])
-   secm[[ii]] = t(x0[sammissall,])\%*\%x0[sammissall,]
+   means[[ii]] = colMeans(x0[sammissall, ])
+   secm[[ii]] = t(x0[sammissall, ]) \%*\% x0[sammissall, ]
  }else{
   means[[ii]] = secm[[ii]] = NA
  }
@@ -80,5 +80,5 @@ cov.miss.mix.wt(x0, means, secm, wt1, wt2)
 
 }
 \author{
-Morteza Amini, \email{morteza.amini@ut.ac.ir}, Afarin Bayat, \email{aftbayat@gmail.com}
+Morteza Amini, \email{morteza.amini@ut.ac.ir}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/rmixlm.R
 \name{rmixlm}
 \alias{rmixlm}
-\title{Random data generation from the mixture of Gaussian linear (Markov-sweaching) models for hhsmm model}
+\title{Random data generation from the mixture of Gaussian linear (Markov-switching) models for hhsmm model}
 \usage{
 rmixlm(j, model, covar.mean, covar.cov)
 }
@@ -16,29 +16,31 @@ rmixlm(j, model, covar.mean, covar.cov)
 \item{covar.cov}{the variance-covariance matrix of covariates (to be generated from multivariate normal distribution)}
 }
 \value{
-a random matrix of observations from mixture of Gaussian linear (Markov-sweaching) models,
+a random matrix of observations from mixture of Gaussian linear (Markov-switching) models,
 in which the first columns are associated with the responses
 and the last columns are associated with the covariates
 }
 \description{
 Generates vectors of covariate and response observations
-from mixture of Gaussian linear (Markov-sweaching) models in a specified state and using the
+from mixture of Gaussian linear (Markov-switching) models in a specified state and using the
 parameters of a specified model
 }
 \examples{
 J <- 3
-initial <- c(1,0,0)
-semi <- rep(FALSE,3)
-P <- matrix(c(0.5, 0.2, 0.3, 0.2, 0.5, 0.3, 0.1, 0.4, 0.5), nrow = J, byrow=TRUE)
-par <- list(intercept = list(3,list(-10,-1),14),
-coefficient = list(-1,list(1,5),-7),
-csigma = list(1.2,list(2.3,3.4),1.1),
-mix.p = list(1,c(0.4,0.6),1))
+initial <- c(1, 0, 0)
+semi <- rep(FALSE, 3)
+P <- matrix(c(0.5, 0.2, 0.3, 0.2, 0.5, 0.3, 0.1, 0.4, 0.5), nrow = J, 
+byrow = TRUE)
+par <- list(intercept = list(3, list(-10, -1), 14),
+coefficient = list(-1, list(1, 5), -7),
+csigma = list(1.2, list(2.3, 3.4), 1.1),
+mix.p = list(1, c(0.4, 0.6), 1))
 model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 dens.emis = dmixlm, semi = semi)
-train <- simulate(model, nsim = c(20,30,42,50), seed = 1234, remission = rmixlm, 
-covar.mean=0, covar.cov=1)
-plot(train$x[,1]~train$x[,2],col=train$s,pch=16)
+train <- simulate(model, nsim = c(20, 30, 42, 50), seed = 1234, 
+remission = rmixlm, covar.mean = 0, covar.cov = 1)
+plot(train$x[,1] ~ train$x[,2], col = train$s, pch = 16, 
+xlab = "x", ylab = "y")
 
 }
 \references{
@@ -47,5 +49,5 @@ regime-switching regression models with endogenous switching.
 Journal of Econometrics, 143(2), 263-273.
 }
 \author{
-Morteza Amini, \email{morteza.amini@ut.ac.ir}, Afarin Bayat,  \email{aftbayat@gmail.com}
+Morteza Amini, \email{morteza.amini@ut.ac.ir}
 }

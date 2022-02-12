@@ -43,20 +43,21 @@
 #'
 #' @examples
 #' J <- 3
-#' initial <- c(1,0,0)
-#' semi <- c(FALSE,TRUE,FALSE)
-#' P <- matrix(c(0.8, 0.1, 0.1, 0.5, 0, 0.5, 0.1, 0.2, 0.7), nrow = J, byrow=TRUE)
-#' par <- list(mu = list(list(7,8),list(10,9,11),list(12,14)),
-#' sigma = list(list(3.8,4.9),list(4.3,4.2,5.4),list(4.5,6.1)),
-#' mix.p = list(c(0.3,0.7),c(0.2,0.3,0.5),c(0.5,0.5)))
-#' sojourn <- list(shape = c(0,3,0), scale = c(0,10,0), type = "gamma")
+#' initial <- c(1, 0, 0)
+#' semi <- c(FALSE, TRUE, FALSE)
+#' P <- matrix(c(0.8, 0.1, 0.1, 0.5, 0, 0.5, 0.1, 0.2, 0.7), nrow = J, 
+#' byrow = TRUE)
+#' par <- list(mu = list(list(7, 8), list(10, 9, 11), list(12, 14)),
+#' sigma = list(list(3.8, 4.9), list(4.3, 4.2, 5.4), list(4.5, 6.1)),
+#' mix.p = list(c(0.3, 0.7), c(0.2, 0.3, 0.5), c(0.5, 0.5)))
+#' sojourn <- list(shape = c(0, 3, 0), scale = c(0, 10, 0), type = "gamma")
 #' model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 #' dens.emis = dmixmvnorm, sojourn = sojourn, semi = semi)
-#' train <- simulate(model, nsim = c(10,8,8,18), seed = 1234, remission = rmixmvnorm)
-#' clus = initial_cluster(train,nstate=3,nmix=c(2,2,2),ltr=FALSE,
-#' final.absorb=FALSE,verbose=TRUE)
-#' par = initial_estimate(clus,verbose=TRUE)
-#' model = make_model(par,semi=NULL,M=max(train$N),sojourn="gamma")
+#' train <- simulate(model, nsim = c(10, 8, 8, 18), seed = 1234, remission = rmixmvnorm)
+#' clus = initial_cluster(train, nstate = 3, nmix = c(2, 2, 2), ltr = FALSE,
+#' final.absorb = FALSE, verbose = TRUE)
+#' par = initial_estimate(clus, verbose = TRUE)
+#' model = make_model(par, semi = NULL, M = max(train$N), sojourn = "gamma")
 #'
 #' @export
 #'
@@ -66,7 +67,9 @@ make_model<-function(par,mstep=mixmvnorm_mstep,dens.emission=dmixmvnorm,semi=NUL
 	if(par$ltr){
 		init <-c(1,rep(0,J-1))
 	}else{
-		init <-rep(1/J,J)
+		init <-sapply(1:J,function(j) sum(j==unlist(lapply(par$state.clus,function(vec) vec[1]))))/length(par$state.clus)
+		init[init==0]=0.05
+		init = init/sum(init)
 	} 
 	if(is.null(semi)){
 		if(par$ltr){

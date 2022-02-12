@@ -20,7 +20,7 @@ mean differences and Hotelling's T-squared test
 }
 \examples{
 data(CMAPSS)
-clus = ltr_clus(CMAPSS$train$x[1:CMAPSS$train$N[1],],3)
+clus = ltr_clus(CMAPSS$train$x[1:CMAPSS$train$N[1], ], 3)
 
 }
 \author{

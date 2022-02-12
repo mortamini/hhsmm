@@ -1,0 +1,50 @@
+#' pdf of the mixture of B-splines for hhsmm
+#'
+#' The probability density function of a mixture of B-splines 
+#' for a specified observation vector, a specified state and a specified 
+#' model's parameters
+#'
+#' @author Morteza Amini, \email{morteza.amini@@ut.ac.ir}, 
+#' Reza Salehian,  \email{reza.salehian@@ut.ac.ir}
+#'
+#' @param x an observation vector or matrix
+#' @param j a specified state between 1 to nstate
+#' @param model a hhsmmspec model
+#' @param K the degrees of freedom for the B-spline, default is \code{K=5}
+#'
+#' @return the probability density function value
+#'
+#' @examples
+#' J <- 3
+#' initial <- c(1, 0, 0)
+#' semi <- c(FALSE, TRUE, FALSE)
+#' P <- matrix(c(0.8, 0.1, 0.1, 0.5, 0, 0.5, 0.1, 0.2, 0.7), 
+#' nrow = J, byrow = TRUE)
+#' par <- list(mu = list(list(7, 8), list(10, 9, 11), list(12, 14)),
+#' sigma = list(list(3.8, 4.9), list(4.3, 4.2, 5.4), list(4.5, 6.1)),
+#' mix.p = list(c(0.3, 0.7), c(0.2, 0.3, 0.5), c(0.5, 0.5)))
+#' sojourn <- list(shape = c(0, 3, 0), scale = c(0, 10, 0), type = "gamma")
+#' model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
+#' dens.emis = dmixmvnorm, sojourn = sojourn, semi = semi)
+#' train <- simulate(model, nsim = c(10, 8, 8, 18), seed = 1234, 
+#' remission = rmixmvnorm)
+#' clus = initial_cluster(train, nstate = 3, nmix = NULL, ltr = FALSE,
+#' final.absorb = FALSE, verbose = TRUE)
+#' semi <- c(FALSE, TRUE, FALSE)
+#' initmodel = initialize_model(clus = clus, mstep = nonpar_mstep,
+#' 	sojourn = "gamma", M = max(train$N), semi = semi)
+#' p = dnonpar(train$x, 1, initmodel)
+#'
+#' @export
+#'
+dnonpar <- function(x, j, model, K=5){
+	x = as.matrix(x)
+	d = ncol(x)
+	coef = model$parms.emission$coef[[j]]
+   	basis = btensor(lapply(1:d, function(i) x[, i]),
+                   df = K, bknots = lapply(1:d, 
+                      function(i) c(min(x[, i]) - 0.01,
+                           max(x[, i]) + 0.01)))
+	dens =    basis %*% coef
+	dens
+}

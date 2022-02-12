@@ -22,7 +22,37 @@ hhsmmspec(
 
 \item{parms.emission}{the parameters of the emission distribution}
 
-\item{sojourn}{the sojourn distribution}
+\item{sojourn}{the sojourn distribution, which is one of the following cases:
+\itemize{
+\item a list containing \code{d}, which is a \code{nobs}
+(number of observations) times
+\code{nstates} (number of states) matrix of probabilities,
+and \code{type = "nonparametric"} for non-parametric sojourn distribution
+\item a list containing the parameters
+\code{mu}, \code{shift} and \code{size} of a shifted
+negative binomial distribution, for each semi-Markovian state, and
+\code{type = "nbinom"} for negative binomial sojourn distribution
+\item a list containing the parameters
+\code{shape} and \code{shift} of a shifted logarithmic
+distribution, for each semi-Markovian state, and
+\code{type = "logarithmic"} for logarithmic sojourn distribution
+\item a list containing the parameters
+\code{lambda} and \code{shift} of the
+shifted poisson distribution, for each semi-Markovian state, and
+\code{type = "poisson"} for Poisson sojourn distribution
+\item a list containing the parameters
+\code{shape} and \code{scale} of the gamma distribution,
+for each semi-Markovian state, and
+\code{type = "gamma"} for gamma sojourn distribution
+\item a list containing the parameters
+\code{shape} and \code{scale} of the Weibull distribution,
+for each semi-Markovian state, and
+\code{type = "weibull"} for Weibull sojourn distribution
+\item a list containing the parameters
+\code{meanlog} and \code{sdlog} of the log-normal distribution,
+for each semi-Markovian state,
+and \code{type = "lnorm"} for log-normal sojourn distribution
+}}
 
 \item{dens.emission}{the probability density function of the emission}
 
@@ -39,17 +69,18 @@ a model of class \code{"hhsmmspec"}
 Specify a model of class \code{"hhsmmspec"} using the model parameters
 }
 \examples{
-init = c(1,0)
-transition = matrix(c(0,1,1,0),2,2)
-parms.emission = list(mix.p=list(c(0.5,0.5),1),
-				mu=list(list(c(1,2),c(5,1)),c(2,7)),
-              sigma=list(list(diag(2),2*diag(2)),0.5*diag(2)))
+init = c(1, 0)
+transition = matrix(c(0, 1, 1, 0), 2, 2)
+parms.emission = list(mix.p = list(c(0.5, 0.5), 1),
+				mu = list(list(c(1, 2), c(5, 1)), c(2, 7)),
+              sigma = list(list(diag(2), 2 * diag(2)), 0.5 * diag(2)))
 sojourn = list(lambda = 1, shift = 5, type = "poisson")
 dens.emission = dmixmvnorm
 remission = rmixmvnorm
 mstep = mixmvnorm_mstep
 semi = rep(TRUE,2)
-model = hhsmmspec(init,transition,parms.emission,sojourn,dens.emission,remission,mstep,semi)
+model = hhsmmspec(init, transition, parms.emission, sojourn, 
+dens.emission, remission, mstep, semi)
 
 }
 \author{

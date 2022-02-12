@@ -3,7 +3,7 @@
 #' A function to split the train data of class \code{"hhsmmdata"}
 #' to train and test subsets with an option to right trim the sequences
 #'
-#' @author Morteza Amini, \email{morteza.amini@@ut.ac.ir}, Afarin Bayat, \email{aftbayat@@gmail.com}
+#' @author Morteza Amini, \email{morteza.amini@@ut.ac.ir}
 #'
 #' @param train the train data of class \code{"hhsmmdata"}
 #' @param train.ratio a number in (0,1] which determines the ratio of the train subset. It can be 
@@ -39,63 +39,63 @@
 #' @export
 #'
 train_test_split <- function(train, train.ratio = 0.7, trim = FALSE, trim.ratio = NULL){
-	if(class(train)!="hhsmmdata") stop("train must be of class hhsmmdata")
-	if(train.ratio<=0 | train.ratio>1) stop("train.ratio must be in (0,1]")
+	if (class(train)!="hhsmmdata") stop("train must be of class hhsmmdata")
+	if (train.ratio <= 0 | train.ratio > 1) stop("train.ratio must be in (0,1]")
 	x = train$x
 	N = train$N
 	n = length(N)
-	if(is.null(trim.ratio)){ 
-		trim.ratio = runif(n)/2+0.5
-	}else{
-		if(length(trim.ratio)!= n & length(trim.ratio)!= 1){
+	if (is.null(trim.ratio)){ 
+		trim.ratio = runif(n) / 2 + 0.5
+	} else {
+		if (length(trim.ratio) != n & length(trim.ratio) != 1) {
 			stop("length of train.ratio must be equal to the number of sequences or 1 !")
-		}else if(length(trim.ratio) == 1){
-			trim.ratio = rep(trim.ratio,n)
+		} else if (length(trim.ratio) == 1) {
+			trim.ratio = rep(trim.ratio, n)
 		}
 	}	
-	if(!is.null(train$s)) s = train$s else s = NULL
-	if(train.ratio<1){
-		ntest = trunc((1-train.ratio) * n)
+	if (!is.null(train$s)) s = train$s else s = NULL
+	if (train.ratio < 1) {
+		ntest = trunc((1 - train.ratio) * n)
 		sam = sample(1:n, ntest)
 		trim.ratio = trim.ratio[sam]
-		Ns = cumsum(c(0,N))
-		xtest = xtrain = rep(0,ncol(x))
+		Ns = cumsum(c(0, N))
+		xtest = xtrain = rep(0, ncol(x))
 		Ntest = Ntrain = c()
-		if(!is.null(s)) stest = strain = c()
-		for(i in 1:n){
-			if(i %in% sam){
-				xtest = rbind(xtest, as.matrix(x[(Ns[i]+1):Ns[i+1],]))
-				Ntest = c(Ntest,N[i])
-				if(!is.null(s)) stest = c(stest,s[(Ns[i]+1):Ns[i+1]])
+		if (!is.null(s)) stest = strain = c()
+		for (i in 1:n) {
+			if (i %in% sam) {
+				xtest = rbind(xtest, as.matrix(x[(Ns[i] + 1):Ns[i + 1], ]))
+				Ntest = c(Ntest, N[i])
+				if (!is.null(s)) stest = c(stest, s[(Ns[i] + 1):Ns[i + 1]])
 			} else {
-				xtrain = rbind(xtrain, as.matrix(x[(Ns[i]+1):Ns[i+1],]))
-				Ntrain = c(Ntrain,N[i])
-				if(!is.null(s)) strain = c(strain,s[(Ns[i]+1):Ns[i+1]])
+				xtrain = rbind(xtrain, as.matrix(x[(Ns[i] + 1):Ns[i + 1], ]))
+				Ntrain = c(Ntrain, N[i])
+				if (!is.null(s)) strain = c(strain, s[(Ns[i] + 1):Ns[i + 1]])
 			}
 		}
-		xtest = as.matrix(xtest[-1,])
-		xtrain = as.matrix(xtrain[-1,])
-	}else{
+		xtest = as.matrix(xtest[-1, ])
+		xtrain = as.matrix(xtrain[-1, ])
+	} else {
 		xtest = xtrain = train$x
-		if(!is.null(s)) strain = stest = train$s
+		if (!is.null(s)) strain = stest = train$s
 		Ntrain = Ntest = train$N
 		ntest = n 
 	}
-	if(trim){
-		if(!is.null(s)) strimmed = c()
-		xtrimmed = rep(0,ncol(x))	
+	if (trim) {
+		if (!is.null(s)) strimmed = c()
+		xtrimmed = rep(0, ncol(x))	
 		Ntrim = trunc(Ntest * trim.ratio)
-		Nts = cumsum(c(0,Ntest))
-		for(i in 1:ntest){
-			xtrimmed = rbind(xtrimmed,as.matrix(xtest[(Nts[i]+1):(Nts[i]+Ntrim[i]),]))
-			if(!is.null(s)) strimmed = c(strimmed,s[(Nts[i]+1):(Nts[i]+Ntrim[i])])
+		Nts = cumsum(c(0, Ntest))
+		for (i in 1:ntest) {
+			xtrimmed = rbind(xtrimmed, as.matrix(xtest[(Nts[i] + 1):(Nts[i] + Ntrim[i]), ]))
+			if (!is.null(s)) strimmed = c(strimmed, s[(Nts[i] + 1):(Nts[i] + Ntrim[i])])
 		}
-		xtrimmed = as.matrix(xtrimmed[-1,])
+		xtrimmed = as.matrix(xtrimmed[-1, ])
 	}
-	if(!is.null(s)){
+	if (!is.null(s)) {
 		train = list(x = xtrain, N = Ntrain , s = strain)
 		test = list(x = xtest, N = Ntest , s = stest)
-		if(trim) trimmed = list(x = xtrimmed, N = Ntrim , s = strimmed)
+		if (trim) trimmed = list(x = xtrimmed, N = Ntrim , s = strimmed)
 			else trimmed = test 
 	} else {
 		train = list(x = xtrain, N = Ntrain)
@@ -103,6 +103,6 @@ train_test_split <- function(train, train.ratio = 0.7, trim = FALSE, trim.ratio 
 		if(trim) trimmed = list(x = xtrimmed, N = Ntrim)
 			else trimmed = test 
 	}
-	class(train) <- class(test) <- "hhsmmdata"
+	class (train) <- class (test) <- class (trimmed) <- "hhsmmdata"
 	list(train = train , test = test, trimmed = trimmed, trimmed.count = Ntest - Ntrim)
 }

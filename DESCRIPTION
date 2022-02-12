@@ -1,17 +1,29 @@
 Package: hhsmm
-Date: 2021-11-23
+Date: 2022-2-7
 Title: Hidden Hybrid Markov/Semi-Markov Model Fitting
-Version: 0.2.2
+Version: 0.2.5
 Authors@R: c(person("Morteza", "Amini", role = c("aut", "cre","cph"),
                      email = "morteza.amini@ut.ac.ir"),
-              person("Afarin", "Bayat", role = "aut"))
-Description: Develops algorithms for fitting, prediction, simulation and initialization of the hidden hybrid Markov/semi-Markov model, introduced by Guedon (2005) <doi:10.1016/j.csda.2004.05.033>. 
+              person("Afarin", "Bayat", role = "aut"),
+              person("Reza", "Salehian", role = "aut"))
+Description: Develops algorithms for fitting, prediction, simulation 
+  and initialization of the hidden hybrid Markov/semi-Markov model, 
+  introduced by Guedon (2005) <doi:10.1016/j.csda.2004.05.033>, 
+  which also includes several tools for handling missing data, 
+  nonparametric mixture of B-splines emissions (Langrock et al., 2015
+  <doi:10.1111/biom.12282>), fitting regime switching regression 
+  (Kim et al., 2008 <doi:10.1016/j.jeconom.2007.10.002>) and auto-regressive 
+  hidden hybrid Markov/semi-Markov model, and many other useful tools 
+  (read for more description: <arXiv:2109.12489>). 
 License: GPL-3
 Imports: 
     Rcpp,
     Rdpack,
     MASS,
-    mice
+    mice,
+    cpr,
+    psych,
+    progress
 RdMacros: Rdpack
 Depends: R (>= 4.1.0), CMAPSS, mvtnorm
 Encoding: UTF-8

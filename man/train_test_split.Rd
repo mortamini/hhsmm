@@ -49,5 +49,5 @@ tt = train_test_split(CMAPSS$train, train.ratio = 0.7, trim = TRUE)
 
 }
 \author{
-Morteza Amini, \email{morteza.amini@ut.ac.ir}, Afarin Bayat, \email{aftbayat@gmail.com}
+Morteza Amini, \email{morteza.amini@ut.ac.ir}
 }

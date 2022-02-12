@@ -5,7 +5,7 @@
 #' missing values using the observation matrix and the estimated 
 #' weight vectors
 #'
-#' @author Morteza Amini, \email{morteza.amini@@ut.ac.ir}, Afarin Bayat,  \email{aftbayat@@gmail.com}
+#' @author Morteza Amini, \email{morteza.amini@@ut.ac.ir}
 #'
 #' @param x the observation matrix which can contain missing values (NA or NaN)
 #' @param wt1 the state probabilities matrix (number of observations 

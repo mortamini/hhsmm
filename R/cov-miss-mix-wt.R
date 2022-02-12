@@ -4,7 +4,7 @@
 #' observation matrix and the estimated weight 
 #' vectors for a data matrix containing missing values (NA or NaN)
 #'
-#' @author Morteza Amini, \email{morteza.amini@@ut.ac.ir}, Afarin Bayat, \email{aftbayat@@gmail.com}
+#' @author Morteza Amini, \email{morteza.amini@@ut.ac.ir}
 #'
 #' @param x the observation matrix, which can contain missing values (NA or NaN)
 #' @param means a list containing the means of the missing values given observed values
@@ -36,17 +36,17 @@
 #'
 #' @examples
 #' data(CMAPSS)
-#' x0 = CMAPSS$train$x[1:CMAPSS$train$N[1],]
+#' x0 = CMAPSS$train$x[1:CMAPSS$train$N[1], ]
 #' n = nrow(x0)
 #' wt1 = runif(n)
 #' wt2 = runif(n)
 #' p = ncol(x0)
-#' sammissall = sample(1:n,trunc(n/20))
+#' sammissall = sample(1:n, trunc(n / 20))
 #' means = secm = list()
 #' for(ii in 1:n){ 
 #' 	if(ii %in% sammissall){
-#'    means[[ii]] = colMeans(x0[sammissall,])
-#'    secm[[ii]] = t(x0[sammissall,])%*%x0[sammissall,]
+#'    means[[ii]] = colMeans(x0[sammissall, ])
+#'    secm[[ii]] = t(x0[sammissall, ]) %*% x0[sammissall, ]
 #'  }else{
 #'	  means[[ii]] = secm[[ii]] = NA
 #'  }
@@ -57,8 +57,9 @@
 #' 
 #' @export
 #'
-cov.miss.mix.wt<- function (x, means, secm, wt1 = rep(1/nrow(x), nrow(x)), wt2 = rep(1/nrow(x), nrow(x)) , 
- cor = FALSE, center = TRUE, method = c("unbiased", "ML")) 
+cov.miss.mix.wt <- function(x, means, secm, wt1 = rep(1/nrow(x), nrow(x)), 
+	wt2 = rep(1/nrow(x), nrow(x)), cor = FALSE, center = TRUE, 
+	method = c("unbiased", "ML"))
 {
     if (is.data.frame(x)) 
         x <- as.matrix(x)
@@ -74,39 +75,40 @@ cov.miss.mix.wt<- function (x, means, secm, wt1 = rep(1/nrow(x), nrow(x)), wt2 =
     if ((s1 <- sum(wt1)) == 0) 
         stop("state weights must be not all zero")
     if ((s2 <- sum(wt2)) == 0) 
-        warning("for some mixture components weights are all zero! The components are not used!")
+        warning("for some mixture components weights are all zero! 
+			The components are not used!")
 	wt <- wt1 * wt2 / sum(wt1 * wt2)
 	xr = x
-	for(i in 1:nrow(xr)) xr[i,is.na(xr[i,])|is.nan(xr[i,])] = means[[i]]
+	for (i in 1:nrow(xr)) xr[i, is.na(xr[i, ]) | is.nan(xr[i, ])] = means[[i]]
     if (is.logical(center)) {
         center <- if (center){ 
             colSums(wt * xr) 
-        }else 0
-    }else {
+        } else 0
+    } else {
         if (length(center) != ncol(x)) 
             stop("length of 'center' must equal the number of columns in 'x'")
     }
-	cov1 = matrix(0,ncol(x),ncol(x))
-	missed = apply(x,1,function(t) which(is.na(t)|is.nan(t)))
-	for(i in 1:nrow(x)){
-		covtmp = crossprod(sqrt(wt[i]) * sweep(t(as.matrix(xr[i,])), 2, center, check.margin = FALSE))
-		if(length(missed[[i]])>0){
-			covmm = wt[i]*(secm[[i]]+center[missed[[i]]]%*%t(center[missed[[i]]])-
-				 center[missed[[i]]]%*%t(means[[i]])-
-				means[[i]]%*%t(center[missed[[i]]]))
-				####/nrow(x)
-			covtmp[missed[[i]],missed[[i]]] = covmm 
+	cov1 = matrix(0, ncol(x), ncol(x))
+	missed = apply(x, 1, function(t) which(is.na(t) | is.nan(t)))
+	for (i in 1:nrow(x)){
+		covtmp = crossprod(sqrt(wt[i]) * sweep(t(as.matrix(xr[i, ])), 
+				2, center, check.margin = FALSE))
+		if (length(missed[[i]]) > 0){
+			covmm = wt[i] * (secm[[i]] + center[missed[[i]]] %*% 
+				t(center[missed[[i]]]) - center[missed[[i]]] %*% 
+				t(means[[i]]) - means[[i]] %*% t(center[missed[[i]]]))
+			covtmp[missed[[i]], missed[[i]]] = covmm 
 		}
 		cov1 = cov1 + covtmp
 	}
-    cov <- switch(match.arg(method), unbiased = cov1/(1 - 
-        sum(wt^2)), ML = cov1)
+    cov <- switch(match.arg(method), unbiased = cov1/(1 - sum(wt^2)), 
+			ML = cov1)
     	y <- list(cov = cov, center = center, n.obs = n)
     	y$wt1 <- wt1
     	y$wt2 <- wt2
 	y$pmix = mean(wt2)
-    if (cor) {
-        Is <- 1/sqrt(diag(cov))
+    if (cor){
+        Is <- 1 / sqrt(diag(cov))
         R <- cov
         R[] <- Is * cov * rep(Is, each = nrow(cov))
         y$cor <- R

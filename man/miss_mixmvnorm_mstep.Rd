@@ -40,5 +40,5 @@ emission = miss_mixmvnorm_mstep(CMAPSS$train$x, wt1, wt2, par=NULL)
 
 }
 \author{
-Morteza Amini, \email{morteza.amini@ut.ac.ir}, Afarin Bayat,  \email{aftbayat@gmail.com}
+Morteza Amini, \email{morteza.amini@ut.ac.ir}
 }

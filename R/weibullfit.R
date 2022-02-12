@@ -22,7 +22,7 @@
   	}
   	Quasi.loglike = function(p) -t(wt)%*%logd(p)
   	newpar = tryCatch({
-		fit=nlm(Quasi.loglike,log(par0))
+		suppressWarnings(fit <- nlm(Quasi.loglike,log(par0)))
 		c(fit$estimate,fit$code)
 		},error=function(e){
 		c(log(par0),1)
@@ -34,5 +34,5 @@
      	shape = par0[1]
       	scale = par0[2]
   	}	
-  	return(list(shape=shape,scale=scale))
+  	return(list(shape = shape, scale = scale))
 }

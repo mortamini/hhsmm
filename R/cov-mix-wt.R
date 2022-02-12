@@ -40,8 +40,9 @@
 #' 
 #' @export
 #'
-cov.mix.wt<- function (x, wt1 = rep(1/nrow(x), nrow(x)), wt2 = rep(1/nrow(x), nrow(x)) , 
- cor = FALSE, center = TRUE, method = c("unbiased", "ML")) 
+cov.mix.wt <- function (x, wt1 = rep(1/nrow(x), nrow(x)), 
+	wt2 = rep(1/nrow(x), nrow(x)), 
+ 	cor = FALSE, center = TRUE, method = c("unbiased", "ML")) 
 {
     if (is.data.frame(x)) 
         x <- as.matrix(x)

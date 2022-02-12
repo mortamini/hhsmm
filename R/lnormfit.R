@@ -17,7 +17,7 @@
   	}
   	Quasi.loglike = function(p) -t(wt)%*%logd(p)
   	newpar = tryCatch({
-		fit=nlm(Quasi.loglike,log(par0))
+		suppressWarnings(fit <- nlm(Quasi.loglike,log(par0)))
 		c(fit$estimate,fit$code)
 		},error=function(e){
 		c(log(par0),1)
@@ -29,5 +29,5 @@
      	meanlog = par0[1]
       	sdlog = par0[2]
   	}	
-  	return(list(meanlog =meanlog,sdlog =sdlog))
+  	return(list(meanlog = meanlog, sdlog = sdlog))
 }

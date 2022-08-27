@@ -71,7 +71,7 @@ initial_cluster <- function(train, nstate, nmix, ltr = FALSE,
 {
 		if(length(nmix)==1 & mode(nmix)=="numeric") nmix = rep(nmix,nstate)
 		if(length(nmix)!=nstate & mode(nmix)=="numeric") stop("length of nmix must be 1 or equal the number of states.")
-		if(class(train)!="hhsmmdata") stop("class of train data must be hhsmmdata !")
+		if(!inherits(train, "hhsmmdata")) stop("class of train data must be hhsmmdata !")
 		if(equispace & !ltr) stop("equispace option is only applied for left to right model (ltr=TRUE)!")
 		if(!ltr & final.absorb){
 			final.absorb = FALSE
@@ -163,7 +163,7 @@ initial_cluster <- function(train, nstate, nmix, ltr = FALSE,
 				}# for m 
 			} else{
 					if(regress){
-						clus = .kregs(data,nstate,nstart=10,resp.ind=resp.ind)$cluster
+						clus = .kregs(data,nstate,nstart=10,resp.ind=resp.ind,verbose=verbose)$cluster
 					}else clus = kmeans(data,nstate,nstart=10)$cluster
 					for(m in 1:num.units){
 						clusters[[m]] = clus[(Ns[m]+1):Ns[m+1]]
@@ -196,7 +196,7 @@ initial_cluster <- function(train, nstate, nmix, ltr = FALSE,
 					while(continue & (cntr+1) < (nrow(Tx[[j]])*0.5) ){
 						cntr = cntr + 1
 						if(regress){
-							tmpclus = .kregs(Tx[[j]],cntr+1,nstart=10,resp.ind=resp.ind)
+							tmpclus = .kregs(Tx[[j]],cntr+1,nstart=10,resp.ind=resp.ind,verbose=verbose)
 						}else   tmpclus = kmeans(Tx[[j]],cntr+1,nstart=10)
 						newW = sum(tmpclus$withinss)
 						DW = c(DW,oldW - newW)
@@ -211,12 +211,12 @@ initial_cluster <- function(train, nstate, nmix, ltr = FALSE,
 						}# if 
 					}# while
 					if(regress){
-						mix.clus[[j]] = .kregs(Tx[[j]],anmix[j],nstart=10,resp.ind=resp.ind)$cluster
+						mix.clus[[j]] = .kregs(Tx[[j]],anmix[j],nstart=10,resp.ind=resp.ind,verbose=verbose)$cluster
 					}else mix.clus[[j]] = kmeans(Tx[[j]],anmix[j],nstart=10)$cluster	
 				}# if 
 			} else {
 				if(regress){
-					mix.clus[[j]] = .kregs(Tx[[j]],nmix[j],nstart=10,resp.ind=resp.ind)$cluster
+					mix.clus[[j]] = .kregs(Tx[[j]],nmix[j],nstart=10,resp.ind=resp.ind,verbose=verbose)$cluster
 				}else mix.clus[[j]] = kmeans(Tx[[j]],nmix[j],nstart=10)$cluster	
 				anmix[j] = nmix[j]
 			}# if else 

@@ -32,15 +32,14 @@
 #' model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 #' dens.emis = dmixlm, semi = semi)
 #' train <- simulate(model, nsim = c(20, 30, 42, 50), seed = 1234, 
-#' remission = rmixlm, covar.mean = 0, covar.cov = 1)
+#' remission = rmixlm, covar = list(mean = 0, cov = 1))
 #' clus = initial_cluster(train = train, nstate = 3, nmix = c(1, 2, 1),
 #' ltr = FALSE, final.absorb = FALSE, verbose = TRUE, regress = TRUE)
 #' initmodel = initialize_model(clus = clus ,mstep = mixlm_mstep,
 #' dens.emission = dmixlm, sojourn = NULL, semi = rep(FALSE, 3),
 #' M = max(train$N),verbose = TRUE)
 #' fit1 = hhsmmfit(x = train, model = initmodel, mstep = mixlm_mstep,
-#' M = max(train$N), maxit = 100, lock.transition = FALSE, 
-#' lock.d = FALSE, lock.init = FALSE, graphical = FALSE, verbose = TRUE)
+#' M = max(train$N))
 #' plot(train$x[, 1] ~ train$x[, 2], col = train$s, pch = 16, 
 #' xlab = "x", ylab = "y")
 #' abline(fit1$model$parms.emission$intercept[[1]],
@@ -61,7 +60,8 @@
 #'
 mixlm_mstep <- function(x, wt1, wt2, resp.ind = 1) 
 {
-  	emission <- list(mix.p = list() ,intercept = list(), coefficients = list(), csigma = list())
+  	emission <- list(mix.p = list(), intercept = list(), 
+		coefficients = list(), csigma = list())
 	nstate <- ncol(wt1)
 	nmix <- c()
 	y <- as.matrix(x[, resp.ind])
@@ -69,6 +69,7 @@ mixlm_mstep <- function(x, wt1, wt2, resp.ind = 1)
 	dx <- ncol(x)
 	dy <- ncol(y)
 	x <- x[1:nrow(y), ]
+	x <- cbind(1, x)
   	for (j in 1:nstate) {
 		nmix[j] <- dim(wt2[[j]])[2]
 		if (nmix[j] > 1) {
@@ -76,31 +77,38 @@ mixlm_mstep <- function(x, wt1, wt2, resp.ind = 1)
 			emission$coefficients[[j]] <- list()
 			emission$csigma[[j]] <- list()
 			emission$mix.p[[j]] <- rep(0, nmix[j])
-			for (i in 1:nmix[j]) {	
-    				tmp <- cov.mix.wt(cbind(x,y), wt1[, j],wt2[[j]][, i])
-				mu <- tmp$center
-				Sigma <- tmp$cov
-				beta <- Sigma[(dx + 1):(dx + dy), 1:dx] %*% ginv(Sigma[1:dx,1:dx])
-				csigma = Sigma[(dx + 1):(dx + dy), (dx + 1):(dx + dy)] - Sigma[(dx + 1):(dx + dy), 1:dx] %*% 
-					ginv(Sigma[1:dx, 1:dx]) %*% Sigma[1:dx, (dx + 1):(dx + dy)]
-    				emission$intercept[[j]][[i]] <- mu[(dx + 1):(dx + dy)] - beta %*% mu[1:dx]
-    				emission$coefficients[[j]][[i]] <- beta
-    				emission$csigma[[j]][[i]] <- csigma
-				emission$mix.p[[j]][i] <-tmp$pmix
+			for (i in 1:nmix[j]) {
+    				tmp <- cov.mix.wt(y, wt1[, j],wt2[[j]][, i])
+				upcov <- tmp$cov
+				wt <- wt1[, j] * wt2[[j]][, i]
+				W <- diag(wt)
+				beta <- ginv(t(x) %*% W %*% x) %*% t(x) %*% W %*% y 
+				res <- y - x %*% beta
+				wt <- wt / sum(wt)
+				res <- sqrt(wt) * res
+    				emission$intercept[[j]][[i]] <- as.matrix(beta[1,])
+    				emission$coefficients[[j]][[i]] <- as.matrix(beta[-1,])
+    				rescov <- t(res) %*% res /(1 - sum(wt^2))
+				if(det(as.matrix(rescov)) > det(as.matrix(upcov))) rescov <- upcov
+				emission$csigma[[j]][[i]] <- rescov
+				emission$mix.p[[j]][i] <- mean(wt2[[j]][, i])
 			}
 			emission$mix.p[[j]] <- emission$mix.p[[j]] / sum(emission$mix.p[[j]])
 		} else {
-    			tmp <- cov.mix.wt(cbind(x,y), wt1[, j], wt2[[j]][, 1])
-			mu <- tmp$center
-			Sigma <- tmp$cov
-			beta <- Sigma[(dx + 1):(dx + dy), 1:dx] %*% ginv(Sigma[1:dx,1:dx])
-			csigma <- Sigma[(dx + 1):(dx + dy), (dx + 1):(dx + dy)] - 
-				Sigma[(dx + 1):(dx + dy),1:dx] %*% 
-				ginv(Sigma[1:dx, 1:dx]) %*% Sigma[1:dx,(dx + 1):(dx + dy)]
-    			emission$intercept[[j]] <- mu[(dx + 1):(dx + dy)] - beta %*% mu[1:dx]
-    			emission$coefficients[[j]] <- beta
-    			emission$csigma[[j]] <- csigma
-			emission$mix.p[[j]] <- tmp$pmix
+    			tmp <- cov.mix.wt(y, wt1[, j], wt2[[j]][, 1])
+			upcov <- tmp$cov
+			wt <- wt1[, j] 
+			W <- diag(wt)
+			beta <- ginv(t(x) %*% W %*% x) %*% t(x) %*% W %*% y 
+			wt <- wt / sum(wt)
+			res <- y - x %*% beta
+			res <- sqrt(wt) * res
+    			emission$intercept[[j]] <- as.matrix(beta[1,])
+    			emission$coefficients[[j]] <- as.matrix(beta[-1,])
+   			rescov <- t(res) %*% res /(1 - sum(wt^2))
+			if(det(as.matrix(rescov)) > det(as.matrix(upcov))) rescov <- upcov
+			emission$csigma[[j]] <- rescov
+			emission$mix.p[[j]] <- 1
 		}#if else 
 	}# for j
   	emission

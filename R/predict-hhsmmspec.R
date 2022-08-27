@@ -63,7 +63,7 @@
 #'
 predict.hhsmmspec <- function(object, newdata, method = "viterbi", M = NA, ...)
  {
-  if (class(newdata) == "hhsmmdata") NN = newdata$N
+  if (inherits(newdata, "hhsmmdata")) NN = newdata$N
   else NN = length(newdata)
   if(is.na(M)) M = max(NN)
   .check.hhsmmspec(object)

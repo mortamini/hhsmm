@@ -31,9 +31,7 @@
 #' semi <- c(FALSE, TRUE, FALSE)
 #' initmodel1 = initialize_model(clus = clus, sojourn = "gamma",
 #' M = max(train$N), semi = semi)
-#' fit1 = hhsmmfit(x = train, model = initmodel1, M = max(train$N),
-#' maxit = 100, lock.transition = FALSE, lock.d = FALSE, lock.init = FALSE,
-#' graphical = FALSE)
+#' fit1 = hhsmmfit(x = train, model = initmodel1, M = max(train$N))
 #' score(test, fit1)
 #' 
 #' @export
@@ -55,8 +53,8 @@ score <- function(xnew, fit)
 	for (i in 1:length(N)) {
 		for (j in (Nc[i] + 1):(Nc[i + 1])) {
 			xx = matrix(xnew[j, ], 1, ncol(xnew))
-			suppressWarnings(score <- c(score, hhsmmfit(xx, fit$model, fit$mstep, maxit = 1, 
-				M = fit$M, verbose = FALSE)$loglik))
+			suppressWarnings(score <- c(score, hhsmmfit(xx, fit$model, fit$mstep,  
+				M = fit$M, par = list(maxit = 1, verbose = FALSE))$loglik))
 		}
 	}
 	score

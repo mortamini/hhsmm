@@ -8,17 +8,20 @@
 #' @param nsim a vector of sequence lengths (might be of length 1)
 #' @param seed a random seed to be set
 #' @param remission a random emission generation function (default = \code{\link{rmixmvnorm}})
-#' @param autoregress logical. if TRUE the auto-regressive data generation will be considered with 
-#' \code{rmixar} function
-#' @param startmean the mean vector for starting value of the auto-regressive 
-#' sequence (if \code{autoregress == TRUE}). If it is not specified the zero mean 
-#' vector will be considered
-#' @param startcov the covarince matrix for starting value of the auto-regressive 
-#' sequence (if \code{autoregress == TRUE}). If it is not specified the identity matrix 
-#' will be considered
-#' @param lags a positive integer which is the number of lags to be considered for the 
-#' auto-regressive sequence 
 #' @param ... additional parameters of the \code{remission} function
+#' @param emission.control a list of additional control parameters including the 
+#' following items:
+#' \itemize{
+#' \item \code{autoregress}{ logical. if TRUE the auto-regressive data generation will be considered with 
+#' \code{rmixar} function}
+#' \item \code{lags}{ a positive integer which is the number of lags to be considered for the 
+#' auto-regressive sequence}
+#' \item \code{start}{ a list containing the items \code{mean} which is the mean vector 
+#' and \code{cov} which is the covarince matrix for starting value of the auto-regressive 
+#' sequence (if \code{autoregress == TRUE}). 
+#' If \code{start} is not specified the zero mean vector and the identity matrix 
+#' will be considered as \code{mean} and \code{cov}, respectively.}
+#' }
 #'
 #' @return a list of class \code{"hsmm.data"} containing the following items:
 #' \itemize{
@@ -47,13 +50,20 @@
 #' @export
 #'
 simulate.hhsmmspec <- function(object, nsim, seed = NULL, 
-	remission = rmixmvnorm, autoregress = FALSE, lags = 1, 
-	startmean, startcov, ...)
+	remission = rmixmvnorm, ..., emission.control = 
+	list(autoregress = FALSE, lags = 1, start = 
+	list(mean = NULL, cov = NULL)))
 {
-	if (autoregress) {
+	defaultec <- list(autoregress = FALSE, lags = 1, start = list(mean = NULL, cov = NULL))
+	emission.control <- modifyList(defaultec, emission.control)
+	if (emission.control$autoregress) {
 		remission = rmixar
-		if (missing(startmean)) startmean = rep(0,length(object$parms.emission$intercept[[1]][[1]]))
-		if (missing(startcov)) startcov = diag(length(object$parms.emission$intercept[[1]][[1]]))
+		if (is.null(emission.control$start$mean)) 
+			emission.control$start$mean = rep(0, 
+				length(object$parms.emission$intercept[[1]][[1]]))
+		if (is.null(emission.control$start$cov)) 
+			emission.control$start$cov = 
+				diag(length(object$parms.emission$intercept[[1]][[1]]))
 	}
 	right.truncate = left.truncate = 0
 	if (!is.null(seed)) set.seed(seed)
@@ -118,12 +128,12 @@ simulate.hhsmmspec <- function(object, nsim, seed = NULL,
 		s1 = s0
 		u = rep(1, sum(nsim))
 	}
-	if (autoregress) {
-		x = rmvnorm(lags, startmean, startcov)
+	if (emission.control$autoregress) {
+		x = rmvnorm(emission.control$lags, emission.control$start$mean, emission.control$start$cov)
 		for(i in 1:length(s1)){
-			x = rbind(x, remission(s1[i], object, x[(nrow(x) - lags + 1):nrow(x), ]))		
+			x = rbind(x, remission(s1[i], object, x[(nrow(x) - emission.control$lags + 1):nrow(x), ]))		
 		}
-		x = as.matrix(x[-(1:lags), ])
+		x = as.matrix(x[-(1:emission.control$lags), ])
 	} else {
     		x = as.matrix(sapply(s1, function(i) remission(i, object, ...)))
 	}
@@ -131,10 +141,11 @@ simulate.hhsmmspec <- function(object, nsim, seed = NULL,
   		N =  nsim
   		tmp = cumsum(c(1, N))
   		for(i in 1:(length(tmp) - 1)) N[i] = sum(u[tmp[i]:(tmp[i + 1] - 1)])
-  		if(NCOL(x) > 1) ret = list(s = s1,x = t(x),N = N)
-  		else ret = list(s = s1,x = x,N = N)
+  		if(NCOL(x) > 1) ret = list(s = s1, x = t(x), N = N)
+  		else ret = list(s = s1, x = x, N = N)
 	} else {
-    		ret = list(s = s1, x = x, N = NROW(x))
+		if(NCOL(x) > 1) ret = list(s = s1, x = t(x), N = NCOL(x))
+    		else ret = list(s = s1, x = x, N = NROW(x))
 	}
     	class(ret) <- "hhsmmdata"
     	ret

@@ -59,9 +59,7 @@
 #' semi <- c(FALSE, TRUE, FALSE)
 #' initmodel1 = initialize_model(clus = clus,sojourn = "gamma",
 #' M = max(train$N), semi = semi)
-#' fit1 = hhsmmfit(x = train, model = initmodel1, M = max(train$N),
-#' maxit = 100, lock.transition = FALSE, lock.d = FALSE, lock.init = FALSE,
-#' graphical = FALSE)
+#' fit1 = hhsmmfit(x = train, model = initmodel1, M = max(train$N))
 #' yhat1 <- predict(fit1, test)
 #'
 #' @references
@@ -213,10 +211,10 @@ predict.hhsmm <- function(object, newdata, future = 0, method = "viterbi",
 	M <- nrow(object$model$d)    
     	m <- object$model
     	m$dens.emission <- object$f
-    tmp <- hhsmmfit(x, m, object$mstep, M = M, maxit = 1, 
-	lock.transition = TRUE, lock.d = TRUE, 
+    tmp <- hhsmmfit(x, m, object$mstep, ..., M = M, 
+	par = list(maxit = 1, lock.transition = TRUE, lock.d = TRUE, 
 	lock.init = TRUE, graphical = FALSE,
-	verbose = FALSE, ...)
+	verbose = FALSE))
 	RUL <- RUL.up <- RUL.low <- c()
 	a <- object$model$transition
 	pmat <- matrix(tmp$estep_variables$gamma, ncol = object$J)

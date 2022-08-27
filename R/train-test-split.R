@@ -39,7 +39,7 @@
 #' @export
 #'
 train_test_split <- function(train, train.ratio = 0.7, trim = FALSE, trim.ratio = NULL){
-	if (class(train)!="hhsmmdata") stop("train must be of class hhsmmdata")
+	if(!inherits(train, "hhsmmdata")) stop("train must be of class hhsmmdata")
 	if (train.ratio <= 0 | train.ratio > 1) stop("train.ratio must be in (0,1]")
 	x = train$x
 	N = train$N

@@ -23,7 +23,7 @@
 #' model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 #' dens.emis = dmixlm, semi = semi)
 #' train <- simulate(model, nsim = c(50, 60, 84, 100), seed = 1234, 
-#' autoregress = TRUE)
+#' emission.control = list(autoregress = TRUE))
 #' laggedtrain = lagdata(train)
 #' 
 #' @export

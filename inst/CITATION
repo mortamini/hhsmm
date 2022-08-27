@@ -1,0 +1,14 @@
+citHeader("To cite hhsmm in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "hhsmm: an R package for hidden hybrid Markov/semi-Markov models",
+  author   = "Morteza Amini, Afarin Bayat & Reza Salehian",
+  journal  = "Computational Statistics",
+  year     = 2022,
+  volume   = 1,
+  number   = 1,
+  pages    = "1-53",
+  url      = "https://link.springer.com/article/10.1007/s00180-022-01248-x",
+  textVersion = paste("Amini, M., Bayat, A. & Salehian, R. hhsmm: an R package for hidden hybrid Markov/semi-Markov models. Comput Stat (2022). https://doi.org/10.1007/s00180-022-01248-x")
+)

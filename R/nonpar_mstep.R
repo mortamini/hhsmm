@@ -9,17 +9,22 @@
 #' @param x the observation matrix
 #' @param wt the state probabilities matrix (number of observations 
 #' times number of states)
-#' @param K the degrees of freedom for the B-spline, default is \code{K=5}
-#' @param lambda0 the initial value of the smoothing parameter, default is \code{lambda0=0.5}
+#' @param control the parameters to control the M-step function. 
+#' The simillar name is chosen with that of \code{\link{dnonpar}}, 
+#' to be used in \code{...} argument of the \code{\link{hhsmmfit}} function.
+#' Here, it contains the following items:
+#' \itemize{
+#' \item \code{K}{ the degrees of freedom for the B-spline, default is \code{K=5}}
+#' \item \code{lambda0}{ the initial value of the smoothing parameter, default is \code{lambda0=0.5}}
+#'}
 #' 
 #' @return list of emission (nonparametric mixture of splines) parameters:
 #' (\code{coef})
 #'
 #' @examples
-#' K <- 5
 #' x <- rmvnorm(100, rep(0, 2), matrix(c(4, 2, 2, 3), 2, 2))
 #' wt <- matrix(rep(1, 100), 100, 1)
-#' emission = nonpar_mstep(x, wt, K = K)
+#' emission = nonpar_mstep(x, wt)
 #' coef <- emission$coef[[1]]
 #' x_axis <- seq(min(x[, 1]), max(x[, 1]), length.out = 100)
 #' y_axis <- seq(min(x[, 2]), max(x[, 2]), length.out = 100)
@@ -49,10 +54,14 @@
 #' 
 #' @export
 #'
-nonpar_mstep = function(x, wt, K = 5, lambda0 = 0.5)
+nonpar_mstep = function(x, wt, control = list(K = 5, lambda0 = 0.5))
 {
+  defcon <- list(K = 5, lambda0 = 0.5)
+  control <- modifyList(defcon, control)
+  K <- control$K
+  lambda0 <- control$lambda0
   nstate <- ncol(wt)
-  emission <- list(coef = list(), lambda = numeric(nstate))
+  emission <- list(coef = list())
   lambda <- numeric(nstate)
   d <- ncol(x)
   n <- nrow(x)
@@ -108,7 +117,6 @@ nonpar_mstep = function(x, wt, K = 5, lambda0 = 0.5)
       	cntr <- cntr + 1
     	}
     	emission$coef[[j]] <- exp(beta_hat[[cntr]]) / sum(exp(beta_hat[[cntr]]))
-    emission$lambda[j] <- lambda[j]
   }# for j
   emission
 }

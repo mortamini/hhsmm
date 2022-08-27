@@ -10,7 +10,11 @@
 #' @param x an observation vector or matrix
 #' @param j a specified state between 1 to nstate
 #' @param model a hhsmmspec model
-#' @param K the degrees of freedom for the B-spline, default is \code{K=5}
+#' @param control the parameters to control the density function. 
+#' The simillar name is chosen with that of \code{\link{nonpar_mstep}}, 
+#' to be used in \code{...} argument of the \code{\link{hhsmmfit}} function.
+#' Here, it contains only the parameter \code{K} which is the degrees of freedom for 
+#' the B-spline, default is \code{K=5}
 #'
 #' @return the probability density function value
 #'
@@ -37,7 +41,8 @@
 #'
 #' @export
 #'
-dnonpar <- function(x, j, model, K=5){
+dnonpar <- function(x, j, model, control = list(K = 5)){
+	K = control$K
 	x = as.matrix(x)
 	d = ncol(x)
 	coef = model$parms.emission$coef[[j]]

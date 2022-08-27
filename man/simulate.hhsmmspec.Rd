@@ -9,11 +9,9 @@
   nsim,
   seed = NULL,
   remission = rmixmvnorm,
-  autoregress = FALSE,
-  lags = 1,
-  startmean,
-  startcov,
-  ...
+  ...,
+  emission.control = list(autoregress = FALSE, lags = 1, start = list(mean = NULL, cov =
+    NULL))
 )
 }
 \arguments{
@@ -25,21 +23,21 @@
 
 \item{remission}{a random emission generation function (default = \code{\link{rmixmvnorm}})}
 
-\item{autoregress}{logical. if TRUE the auto-regressive data generation will be considered with
-\code{rmixar} function}
-
-\item{lags}{a positive integer which is the number of lags to be considered for the
-auto-regressive sequence}
-
-\item{startmean}{the mean vector for starting value of the auto-regressive
-sequence (if \code{autoregress == TRUE}). If it is not specified the zero mean
-vector will be considered}
-
-\item{startcov}{the covarince matrix for starting value of the auto-regressive
-sequence (if \code{autoregress == TRUE}). If it is not specified the identity matrix
-will be considered}
-
 \item{...}{additional parameters of the \code{remission} function}
+
+\item{emission.control}{a list of additional control parameters including the
+following items:
+\itemize{
+\item \code{autoregress}{ logical. if TRUE the auto-regressive data generation will be considered with 
+\code{rmixar} function}
+\item \code{lags}{ a positive integer which is the number of lags to be considered for the 
+auto-regressive sequence}
+\item \code{start}{ a list containing the items \code{mean} which is the mean vector 
+and \code{cov} which is the covarince matrix for starting value of the auto-regressive 
+sequence (if \code{autoregress == TRUE}). 
+If \code{start} is not specified the zero mean vector and the identity matrix 
+will be considered as \code{mean} and \code{cov}, respectively.}
+}}
 }
 \value{
 a list of class \code{"hsmm.data"} containing the following items:

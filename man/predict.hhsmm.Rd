@@ -80,9 +80,7 @@ final.absorb = FALSE, verbose = TRUE)
 semi <- c(FALSE, TRUE, FALSE)
 initmodel1 = initialize_model(clus = clus,sojourn = "gamma",
 M = max(train$N), semi = semi)
-fit1 = hhsmmfit(x = train, model = initmodel1, M = max(train$N),
-maxit = 100, lock.transition = FALSE, lock.d = FALSE, lock.init = FALSE,
-graphical = FALSE)
+fit1 = hhsmmfit(x = train, model = initmodel1, M = max(train$N))
 yhat1 <- predict(fit1, test)
 
 }

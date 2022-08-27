@@ -4,16 +4,20 @@
 \alias{rmixlm}
 \title{Random data generation from the mixture of Gaussian linear (Markov-switching) models for hhsmm model}
 \usage{
-rmixlm(j, model, covar.mean, covar.cov)
+rmixlm(j, model, covar, ...)
 }
 \arguments{
 \item{j}{a specified state}
 
 \item{model}{a \code{\link{hhsmmspec}} model}
 
-\item{covar.mean}{the mean vector of covariates (to be generated from multivariate normal distribution)}
+\item{covar}{either a function which generates the covariate vector or a list containing the following items:
+\itemize{
+\item \code{mean}{ the mean vector of covariates (to be generated from multivariate normal distribution)}
+\item \code{cov}{ the variance-covariance matrix of covariates (to be generated from multivariate normal distribution)}
+}}
 
-\item{covar.cov}{the variance-covariance matrix of covariates (to be generated from multivariate normal distribution)}
+\item{...}{additional arguments of the \code{covar} function}
 }
 \value{
 a random matrix of observations from mixture of Gaussian linear (Markov-switching) models,
@@ -37,9 +41,21 @@ csigma = list(1.2, list(2.3, 3.4), 1.1),
 mix.p = list(1, c(0.4, 0.6), 1))
 model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 dens.emis = dmixlm, semi = semi)
-train <- simulate(model, nsim = c(20, 30, 42, 50), seed = 1234, 
-remission = rmixlm, covar.mean = 0, covar.cov = 1)
-plot(train$x[,1] ~ train$x[,2], col = train$s, pch = 16, 
+
+#use the covar as the list of mean and 
+#variance of the normal distribution 
+
+train1 <- simulate(model, nsim = c(20, 30, 42, 50), seed = 1234, 
+remission = rmixlm, covar = list(mean = 0, cov = 1))
+plot(train1$x[,1] ~ train1$x[,2], col = train1$s, pch = 16, 
+xlab = "x", ylab = "y")
+
+#use the covar as the runif function 
+#to generate one covariate from standard uniform distribution 
+
+train2 <- simulate(model, nsim = c(20, 30, 42, 50), seed = 1234, 
+remission = rmixlm, covar = runif, 1)
+plot(train2$x[,1] ~ train2$x[,2], col = train2$s, pch = 16, 
 xlab = "x", ylab = "y")
 
 }

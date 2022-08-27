@@ -1,7 +1,10 @@
-.kregs<-function(x, centers, iter.max = 10, nstart = 1, resp.ind = 1){
+.kregs<-function(x, centers, iter.max = 10, nstart = 1, resp.ind = 1, verbose){
 	n<-nrow(x)
 	p<-ncol(x)
 	if(centers>n) stop("the number of centers must be less than the number of observations!")	
+	pb <- progress_bar$new(
+		format = " clustering [:bar] :percent in :elapsed",
+				total = nstart * iter.max * n, clear = FALSE, width= 60)
 	if(centers==n){
 		out<-list(
 		cluster = 1:n,
@@ -23,6 +26,7 @@
 			}#for j
 			sumdist[,re] = rep(0,centers)
 			for(i in 1:n){
+				if ((n * p * iter.max * nstart > 1e+8) & (verbose)) pb$tick()
 				xi = x[i,-resp.ind]
 				xi = c(1,xi)
 				yi = x[i,resp.ind]

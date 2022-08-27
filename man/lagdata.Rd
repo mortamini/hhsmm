@@ -31,7 +31,7 @@ csigma = list(5.5, 4, 3.5), mix.p = list(1, 1, 1))
 model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 dens.emis = dmixlm, semi = semi)
 train <- simulate(model, nsim = c(50, 60, 84, 100), seed = 1234, 
-autoregress = TRUE)
+emission.control = list(autoregress = TRUE))
 laggedtrain = lagdata(train)
 
 }

@@ -4,7 +4,7 @@
 \alias{dnonpar}
 \title{pdf of the mixture of B-splines for hhsmm}
 \usage{
-dnonpar(x, j, model, K = 5)
+dnonpar(x, j, model, control = list(K = 5))
 }
 \arguments{
 \item{x}{an observation vector or matrix}
@@ -13,7 +13,11 @@ dnonpar(x, j, model, K = 5)
 
 \item{model}{a hhsmmspec model}
 
-\item{K}{the degrees of freedom for the B-spline, default is \code{K=5}}
+\item{control}{the parameters to control the density function.
+The simillar name is chosen with that of \code{\link{nonpar_mstep}},
+to be used in \code{...} argument of the \code{\link{hhsmmfit}} function.
+Here, it contains only the parameter \code{K} which is the degrees of freedom for
+the B-spline, default is \code{K=5}}
 }
 \value{
 the probability density function value

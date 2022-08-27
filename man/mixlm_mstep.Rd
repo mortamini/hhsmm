@@ -42,15 +42,14 @@ mix.p = list(1, c(0.4, 0.6), 1))
 model <- hhsmmspec(init = initial, transition = P, parms.emis = par,
 dens.emis = dmixlm, semi = semi)
 train <- simulate(model, nsim = c(20, 30, 42, 50), seed = 1234, 
-remission = rmixlm, covar.mean = 0, covar.cov = 1)
+remission = rmixlm, covar = list(mean = 0, cov = 1))
 clus = initial_cluster(train = train, nstate = 3, nmix = c(1, 2, 1),
 ltr = FALSE, final.absorb = FALSE, verbose = TRUE, regress = TRUE)
 initmodel = initialize_model(clus = clus ,mstep = mixlm_mstep,
 dens.emission = dmixlm, sojourn = NULL, semi = rep(FALSE, 3),
 M = max(train$N),verbose = TRUE)
 fit1 = hhsmmfit(x = train, model = initmodel, mstep = mixlm_mstep,
-M = max(train$N), maxit = 100, lock.transition = FALSE, 
-lock.d = FALSE, lock.init = FALSE, graphical = FALSE, verbose = TRUE)
+M = max(train$N))
 plot(train$x[, 1] ~ train$x[, 2], col = train$s, pch = 16, 
 xlab = "x", ylab = "y")
 abline(fit1$model$parms.emission$intercept[[1]],

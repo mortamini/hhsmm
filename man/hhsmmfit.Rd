@@ -8,14 +8,10 @@ hhsmmfit(
   x,
   model,
   mstep = NULL,
+  ...,
   M = NA,
-  maxit = 100,
-  lock.transition = FALSE,
-  lock.d = FALSE,
-  lock.init = FALSE,
-  graphical = FALSE,
-  verbose = TRUE,
-  ...
+  par = list(maxit = 100, lock.transition = FALSE, lock.d = FALSE, lock.init = FALSE,
+    graphical = FALSE, verbose = TRUE)
 )
 }
 \arguments{
@@ -25,21 +21,20 @@ hhsmmfit(
 
 \item{mstep}{the M step function for the EM algorithm, which also can be given in the model}
 
+\item{...}{additional parameters for the dens.emission and mstep functions}
+
 \item{M}{the maximum duration in each state}
 
-\item{maxit}{the maximum number of iterations for the EM algorithm}
-
-\item{lock.transition}{logical. if TRUE the transition matrix will not be updated through the EM algorithm}
-
-\item{lock.d}{logical. if TRUE the sojourn probability matrix d will not be updated through the EM algorithm}
-
-\item{lock.init}{logical. if TRUE the initial probability vector will not be updated through the EM algorithm}
-
-\item{graphical}{logical. if TRUE a plot of the sojourn probabilities will be plotted through the EM algorithm}
-
-\item{verbose}{logical. if TRUE the outputs will be printed}
-
-\item{...}{additional parameters for the dens.emission and mstep functions}
+\item{par}{additional list of control parameters of the \code{hhsmmfit} function
+including the following items:
+\itemize{
+\item \code{maxit}{ the maximum number of iterations for the EM algorithm}
+\item \code{lock.transition}{ logical. if TRUE the transition matrix will not be updated through the EM algorithm}
+\item \code{lock.d}{ logical. if TRUE the sojourn probability matrix d will not be updated through the EM algorithm}
+\item \code{lock.init}{ logical. if TRUE the initial probability vector will not be updated through the EM algorithm}
+\item \code{graphical}{ logical. if TRUE a plot of the sojourn probabilities will be plotted through the EM algorithm}
+\item \code{verbose}{ logical. if TRUE the outputs will be printed}
+}}
 }
 \value{
 a list of class \code{"hhsmm"} containing the following items:
@@ -79,9 +74,7 @@ clus = initial_cluster(train, nstate = 3, nmix = c(2 ,2, 2),ltr = FALSE,
 final.absorb = FALSE, verbose = TRUE)
 initmodel1 = initialize_model(clus = clus, sojourn = "gamma", 
 M = max(train$N), semi = semi)
-fit1 = hhsmmfit(x = train, model = initmodel1, M = max(train$N),
-maxit = 100, lock.transition = FALSE, lock.d = FALSE, lock.init = FALSE,
-graphical = FALSE)
+fit1 = hhsmmfit(x = train, model = initmodel1, M = max(train$N))
 
 }
 \references{
